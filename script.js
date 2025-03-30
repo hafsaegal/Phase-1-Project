@@ -1,62 +1,73 @@
-document
-  .getElementById("drug-form")
-  .addEventListener("submit", function (event) {
-    event.preventDefault(); // Prevent page reload
+document.addEventListener("DOMContentLoaded", () => {
+  const sections = document.querySelectorAll("main section");
+  const navButtons = document.querySelector("nav");
+  const searchBtn = document.getElementById("search-btn");
+  const checkInteractionBtn = document.getElementById("check-interaction");
+  const savedList = document.getElementById("saved-list");
 
-    const drugInput = document.getElementById("drug-input").value.trim();
-    if (!drugInput) {
-      alert("Please enter drug names.");
-      return;
+  // Handle navigation
+  navButtons.addEventListener("click", (event) => {
+    if (event.target.dataset.section) {
+      sections.forEach((sec) => sec.classList.remove("active"));
+      document
+        .getElementById(event.target.dataset.section)
+        .classList.add("active");
     }
-
-    const drugNames = drugInput.split(",").map((drug) => drug.trim()); // Split and trim input
-    fetchDrugInteractions(drugNames);
   });
 
-function fetchDrugInteractions(drugNames) {
-  const baseURL = "https://rxnav.nlm.nih.gov/REST/";
+  // Search Drug (Fetching from JSON Server)
+  searchBtn.addEventListener("click", () => {
+    const drugName = document.getElementById("drug-search").value.trim();
+    if (!drugName) return;
 
-  // Convert drug names to RxCUI (drug IDs)
-  Promise.all(
-    drugNames.map((drug) =>
-      fetch(`${baseURL}rxcui.json?name=${drug}`)
-        .then((response) => response.json())
-        .then((data) =>
-          data.idGroup.rxnormId ? data.idGroup.rxnormId[0] : null
-        )
-    )
-  ).then((rxCuis) => {
-    rxCuis = rxCuis.filter((id) => id !== null); // Remove null values
-
-    if (rxCuis.length < 2) {
-      document.getElementById("results").innerHTML =
-        "<p>Not enough valid drugs found to check interactions.</p>";
-      return;
-    }
-
-    // Check interactions
-    fetch(`${baseURL}interaction/list.json?rxcuis=${rxCuis.join("+")}`)
+    fetch(`http://localhost:3000/drugs?name=${drugName}`)
       .then((response) => response.json())
-      .then((data) => displayInteractions(data))
-      .catch((error) => console.error("Error fetching interactions:", error));
+      .then((data) => {
+        if (data.length > 0) {
+          const drug = data[0];
+          document.getElementById("drug-info").innerHTML = `
+                        <p><strong>${drug.name}</strong>: ${drug.description}</p> 
+                        <button onclick="saveDrug('${drug.name}')">Save Drug</button>
+                    `;
+        } else {
+          document.getElementById("drug-info").innerHTML =
+            "<p>Drug not found.</p>";
+        }
+      })
+      .catch(() => {
+        document.getElementById("drug-info").innerHTML =
+          "<p>Error fetching data.</p>";
+      });
   });
-}
 
-function displayInteractions(data) {
-  const resultsDiv = document.getElementById("results");
-  resultsDiv.innerHTML = ""; // Clear previous results
+  // Check Drug Interactions (Fetching from JSON Server)
+  checkInteractionBtn.addEventListener("click", () => {
+    const drug1 = document.getElementById("drug1").value.trim();
+    const drug2 = document.getElementById("drug2").value.trim();
+    if (!drug1 || !drug2) return;
 
-  if (!data.fullInteractionTypeGroup) {
-    resultsDiv.innerHTML = "<p>No known interactions found.</p>";
-    return;
-  }
-
-  const interactions = data.fullInteractionTypeGroup
-    .flatMap((group) => group.fullInteractionType)
-    .flatMap((type) => type.interactionPair);
-
-  resultsDiv.innerHTML = "<h3>Potential Interactions:</h3>";
-  interactions.forEach((interaction) => {
-    resultsDiv.innerHTML += `<p><strong>${interaction.description}</strong></p>`;
+    fetch(`http://localhost:3000/interactions?drug1=${drug1}&drug2=${drug2}`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.length > 0) {
+          document.getElementById(
+            "interaction-result"
+          ).innerHTML = `<p>Interaction: ${data[0].description}</p>`;
+        } else {
+          document.getElementById("interaction-result").innerHTML =
+            "<p>No interactions found.</p>";
+        }
+      })
+      .catch(() => {
+        document.getElementById("interaction-result").innerHTML =
+          "<p>Error fetching data.</p>";
+      });
   });
-}
+
+  // Save Drug Function (Saving Locally)
+  window.saveDrug = (drugName) => {
+    const li = document.createElement("li");
+    li.textContent = drugName;
+    savedList.appendChild(li);
+  };
+});

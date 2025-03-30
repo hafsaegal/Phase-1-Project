@@ -3,18 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Drug Interaction Checker</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Drug Info & Interaction Checker</title>
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Drug Interaction Checker</h1>
-        <form id="drug-form">
-            <input type="text" id="drug-input" placeholder="Enter drug names (comma-separated)" required>
-            <button type="submit">Check Interactions</button>
-        </form>
-        <div id="results"></div>
-    </div>
-    <script src="script.js"></script>
+    <header>
+        <h1>Drug Information & Interaction Checker</h1>
+        <nav>
+            <button data-section="search">Search Drug</button>
+            <button data-section="interactions">Check Interactions</button>
+            <button data-section="saved">Saved Drugs</button>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Search Section -->
+        <section id="search" class="active">
+            <h2>Search for a Drug</h2>
+            <input type="text" id="drug-search" placeholder="Enter drug name...">
+            <button id="search-btn">Search</button>
+            <div id="drug-info"></div>
+        </section>
+
+        <!-- Interactions Section -->
+        <section id="interactions">
+            <h2>Check Drug Interactions</h2>
+            <input type="text" id="drug1" placeholder="First Drug">
+            <input type="text" id="drug2" placeholder="Second Drug">
+            <button id="check-interaction">Check</button>
+            <div id="interaction-result"></div>
+        </section>
+
+        <!-- Saved Drugs Section -->
+        <section id="saved">
+            <h2>Saved Drugs</h2>
+            <ul id="saved-list"></ul>
+        </section>
+    </main>
+
+    <script src="js/script.js"></script>
 </body>
 </html>

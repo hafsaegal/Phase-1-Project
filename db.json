@@ -1,0 +1,22 @@
+{
+  "drugs": [
+    {
+      "id": 1,
+      "name": "Aspirin",
+      "description": "Used to reduce pain and fever."
+    },
+    {
+      "id": 2,
+      "name": "Ibuprofen",
+      "description": "An anti-inflammatory drug."
+    }
+  ],
+  "interactions": [
+    {
+      "id": 1,
+      "drug1": "Aspirin",
+      "drug2": "Ibuprofen",
+      "description": "Increased risk of stomach bleeding."
+    }
+  ]
+}
